@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light background for contrast */
+        }
+        /* Custom styles for the hamburger icon animation */
+        .hamburger-line {
+            width: 24px;
+            height: 3px;
+            background-color: #333;
+            display: block;
+            transition: all 0.3s ease-in-out;
+            border-radius: 9999px; /* Rounded corners for lines */
+        }
+        .hamburger-line:nth-child(2) {
+            margin: 4px 0;
+        }
+        .hamburger.open .hamburger-line:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .hamburger.open .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.open .hamburger-line:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+        /* Style for the cookie consent banner */
+        #cookie-consent-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #333; /* Dark background for the banner */
+            color: white;
+            padding: 1.5rem;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Ensure it's above other content */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-top-left-radius: 0.75rem; /* Rounded top corners */
+            border-top-right-radius: 0.75rem;
+            transition: transform 0.5s ease-in-out; /* Smooth slide-in/out */
+            transform: translateY(100%); /* Start off-screen */
+        }
+        #cookie-consent-banner.show {
+            transform: translateY(0); /* Slide into view */
+        }
+        #cookie-consent-banner p {
+            margin-bottom: 1rem;
+            text-align: center;
+            line-height: 1.6;
+        }
+        #cookie-consent-banner .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+            justify-content: center;
+        }
+        #cookie-consent-banner button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px; /* Fully rounded buttons */
+            font-weight: 600;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        #cookie-consent-banner button:hover {
+            transform: translateY(-2px);
+        }
+        #accept-cookies {
+            background-color: #4CAF50; /* Green for accept */
+            color: white;
+            border: none;
+        }
+        #accept-cookies:hover {
+            background-color: #45a049;
+        }
+        #decline-cookies {
+            background-color: #f44336; /* Red for decline */
+            color: white;
+            border: none;
+        }
+        #decline-cookies:hover {
+            background-color: #da190b;
+        }
+        #learn-more {
+            background-color: #555; /* Darker grey for learn more */
+            color: white;
+            border: none;
+        }
+        #learn-more:hover {
+            background-color: #666;
+        }
+
+        /* Slider specific styles */
+        #slider-container {
+            width: 100%;
+            display: flex;
+            overflow: hidden;
+            scroll-behavior: smooth;
+        }
+        .slide {
+            min-width: 100%; /* Each slide takes full width */
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+            /* No border-radius here if the section itself has it and covers full width */
+        }
+        #slide-indicators .dot {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #slide-indicators .dot.active {
+            background-color: white;
+        }
+        /* Navigation arrows styling */
+        .slider-arrow {
+            background-color: rgba(0, 0, 0, 0.3); /* Made more transparent */
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 9999px;
+            font-size: 1.5rem;
+            line-height: 1;
+            transition: background-color 0.3s ease; /* Removed transform transition */
+            backdrop-filter: blur(5px); /* Subtle blur effect */
+            -webkit-backdrop-filter: blur(5px); /* For Safari */
+            z-index: 10; /* Ensure arrows are above images */
+            cursor: pointer; /* Ensure cursor indicates interactivity */
+        }
+        .slider-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.6); /* Slightly darker on hover, no jump */
+        }
+
+        /* Smooth scroll margin for fixed header */
+        .scroll-target {
+            scroll-margin-top: 4.5rem; /* Height of the fixed navbar */
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="bg-white shadow-lg rounded-b-xl py-4 px-6 md:px-8 lg:px-12 fixed w-full z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#home-section" class="text-2xl font-bold text-gray-800 hover:text-indigo-600 transition duration-300 ease-in-out">
+                YourStartup<span class="text-indigo-600">.co</span>
+            </a>
+
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="hamburger p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+            </div>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#home-section" class="text-gray-600 hover:text-indigo-600 font-medium transition duration-300 ease-in-out">Home</a>
+                <a href="#features-section" class="text-gray-600 hover:text-indigo-600 font-medium transition duration-300 ease-in-out">Features</a>
+                <a href="#about-us-section" class="text-gray-600 hover:text-indigo-600 font-medium transition duration-300 ease-in-out">About Us</a>
+                <a href="#contact-section" class="text-gray-600 hover:text-indigo-600 font-medium transition duration-300 ease-in-out">Contact</a>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="navbar-menu hidden fixed top-0 left-0 bottom-0 flex flex-col w-5/6 max-w-sm py-6 px-6 bg-white border-r overflow-y-auto z-40">
+            <div class="flex items-center mb-8">
+                <a href="#home-section" class="mr-auto text-2xl font-bold text-gray-800">
+                    YourStartup<span class="text-indigo-600">.co</span>
+                </a>
+                <button id="mobile-menu-close" class="navbar-close">
+                    <svg class="h-6 w-6 text-gray-400 cursor-pointer hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div>
+                <ul>
+                    <li class="mb-1">
+                        <a class="block p-4 text-sm font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600 rounded-md transition duration-200 ease-in-out" href="#home-section">Home</a>
+                    </li>
+                    <li class="mb-1">
+                        <a class="block p-4 text-sm font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600 rounded-md transition duration-200 ease-in-out" href="#features-section">Features</a>
+                    </li>
+                    <li class="mb-1">
+                        <a class="block p-4 text-sm font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600 rounded-md transition duration-200 ease-in-out" href="#about-us-section">About Us</a>
+                    </li>
+                    <li class="mb-1">
+                        <a class="block p-4 text-sm font-semibold text-gray-700 hover:bg-gray-100 hover:text-indigo-600 rounded-md transition duration-200 ease-in-out" href="#contact-section">Contact</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="mt-auto">
+                <div class="pt-6">
+                    <a href="#" class="block px-4 py-3 mb-3 leading-loose text-sm text-center font-semibold bg-gray-50 hover:bg-gray-100 text-gray-900 rounded-xl transition duration-200">Sign In</a>
+                    <a href="#" class="block px-4 py-3 mb-2 leading-loose text-sm text-center text-white font-semibold bg-indigo-600 hover:bg-indigo-700 rounded-xl transition duration-200">Sign Up</a>
+                </div>
+                <p class="my-4 text-xs text-center text-gray-400">
+                    <span>Copyright &copy; <span id="current-year-mobile"></span></span>
+                </p>
+            </div>
+        </div>
+        <div id="mobile-menu-backdrop" class="navbar-backdrop fixed inset-0 bg-gray-800 opacity-25 hidden z-30"></div>
+    </nav>
+
+    <section id="main-slider-section" class="relative w-full overflow-hidden shadow-lg pt-[4.5rem]">
+        <div id="slider-container" class="flex transition-transform duration-700 ease-in-out">
+            <div class="slide min-w-full">
+                <img src="https://placehold.co/1920x600/3498db/ffffff?text=AI-generated+Robot+Delivery+Scene" alt="AI-generated image: Autonomous robots delivering packages on a city street" class="w-full h-auto object-cover">
+            </div>
+            <div class="slide min-w-full">
+                <img src="https://placehold.co/1920x600/2ecc71/ffffff?text=Futuristic+Road-Based+Logistics+2" alt="Futuristic City Logistics Robots 2" class="w-full h-auto object-cover">
+            </div>
+            <div class="slide min-w-full">
+                <img src="https://placehold.co/1920x600/e74c3c/ffffff?text=Next-Gen+Delivery+Robots+on+Streets+3" alt="Autonomous Delivery Vans Animation 3" class="w-full h-auto object-cover">
+            </div>
+            <div class="slide min-w-full">
+                <img src="https://placehold.co/1920x600/9b59b6/ffffff?text=Efficient+Urban+Robot+Couriers+4" alt="Road-Based Robot Couriers 4" class="w-full h-auto object-cover">
+            </div>
+        </div>
+
+        <button id="prev-slide" class="absolute top-1/2 left-4 -translate-y-1/2 slider-arrow">
+            &#10094; </button>
+        <button id="next-slide" class="absolute top-1/2 right-4 -translate-y-1/2 slider-arrow">
+            &#10095; </button>
+
+        <div id="slide-indicators" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+            </div>
+    </section>
+
+    <main class="max-w-6xl mx-auto p-8">
+
+        <section id="home-section" class="scroll-target min-h-[60vh] flex flex-col justify-center items-center text-center py-16">
+            <h1 class="text-5xl font-extrabold text-gray-900 mb-6">Welcome to Your Startup!</h1>
+            <p class="text-lg text-gray-700 max-w-3xl leading-relaxed">
+                We are building the future of autonomous logistics, bringing efficiency and innovation to urban delivery.
+                Discover how our cutting-edge robot solutions can transform your business and daily life.
+            </p>
+        </section>
+
+        <section id="features-section" class="scroll-target py-16 bg-white rounded-xl shadow-lg mt-8">
+            <h2 class="text-4xl font-bold text-gray-900 text-center mb-12">Our Core Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-6">
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out flex flex-col items-center text-center">
+                    <div class="text-indigo-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Efficient Delivery Routes</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Our advanced algorithms optimize delivery paths, ensuring the fastest and most energy-efficient routes for every package.
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out flex flex-col items-center text-center">
+                    <div class="text-indigo-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Real-time Tracking</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Monitor your deliveries every step of the way with precise, real-time tracking from dispatch to destination.
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out flex flex-col items-center text-center">
+                    <div class="text-indigo-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Secure & Reliable</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Our robots are built with robust security features and designed for reliable operation in diverse urban environments.
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out flex flex-col items-center text-center">
+                    <div class="text-indigo-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Cost-Effective Solutions</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Reduce operational costs and increase delivery capacity with our scalable and affordable autonomous robot fleet.
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out flex flex-col items-center text-center">
+                    <div class="text-indigo-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Customizable Fleet</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Tailor your robot fleet to your specific needs, from size and capacity to specialized functionalities.
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out flex flex-col items-center text-center">
+                    <div class="text-indigo-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Eco-Friendly Operations</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Contribute to a greener city with zero-emission autonomous deliveries, reducing your carbon footprint.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="about-us-section" class="scroll-target min-h-[60vh] flex flex-col justify-center items-center text-center py-16 mt-8">
+            <h2 class="text-4xl font-bold text-gray-900 mb-6">About Our Vision</h2>
+            <p class="text-lg text-gray-700 max-w-3xl leading-relaxed">
+                Founded on the principle of innovation and sustainability, YourStartup.co is dedicated to revolutionizing urban logistics.
+                Our team of experts in AI, robotics, and urban planning is committed to creating smarter, more efficient, and eco-friendly delivery solutions for businesses and communities worldwide.
+            </p>
+            <p class="text-lg text-gray-700 max-w-3xl leading-relaxed mt-4">
+                We believe in a future where autonomous technology enhances daily life, reduces traffic congestion, and minimizes environmental impact. Join us on this journey to redefine urban mobility.
+            </p>
+        </section>
+
+        <section id="contact-section" class="scroll-target min-h-[60vh] flex flex-col justify-center items-center text-center py-16 mt-8">
+            <h2 class="text-4xl font-bold text-gray-900 mb-6">Get in Touch</h2>
+            <p class="text-lg text-gray-700 max-w-3xl leading-relaxed mb-8">
+                Have questions or want to learn more about our autonomous delivery solutions? We'd love to hear from you!
+                Reach out to our team, and let's discuss how we can help your business thrive.
+            </p>
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="mailto:info@yourstartup.co" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-indigo-700 transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                    Email Us
+                </a>
+                <a href="tel:+1234567890" class="bg-gray-200 text-gray-800 px-8 py-3 rounded-full font-semibold hover:bg-gray-300 transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                    Call Us
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 px-6 md:px-8 lg:px-12 rounded-t-xl mt-8">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+            <p class="text-sm text-gray-400 mb-4 md:mb-0">
+                &copy; <span id="current-year-footer"></span> YourStartup.co. All rights reserved.
+            </p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300 ease-in-out text-sm">Privacy Policy</a>
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300 ease-in-out text-sm">Terms of Service</a>
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300 ease-in-out text-sm">Cookies Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="cookie-consent-banner" class="hidden">
+        <p>
+            This website uses cookies to ensure you get the best experience on our website. By clicking "Accept", you agree to our use of cookies.
+            <a href="#" class="text-indigo-300 hover:underline" id="learn-more-cookies">Learn More</a>
+        </p>
+        <div class="button-group">
+            <button id="accept-cookies">Accept</button>
+            <button id="decline-cookies">Decline</button>
+        </div>
+    </div>
+
+    <script>
+        // Get elements
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuCloseButton = document.getElementById('mobile-menu-close');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        const currentYearMobileSpan = document.getElementById('current-year-mobile');
+        const currentYearFooterSpan = document.getElementById('current-year-footer');
+
+        const cookieBanner = document.getElementById('cookie-consent-banner');
+        const acceptCookiesButton = document.getElementById('accept-cookies');
+        const declineCookiesButton = document.getElementById('decline-cookies');
+        const learnMoreCookiesLink = document.getElementById('learn-more-cookies');
+
+        // Slider elements
+        const sliderSection = document.getElementById('main-slider-section');
+        const sliderContainer = document.getElementById('slider-container');
+        const slides = document.querySelectorAll('.slide');
+        const prevSlideButton = document.getElementById('prev-slide');
+        const nextSlideButton = document.getElementById('next-slide');
+        const slideIndicators = document.getElementById('slide-indicators');
+
+        let currentSlideIndex = 0;
+        const totalSlides = slides.length;
+        let slideInterval;
+
+        // Set current year dynamically for both mobile menu and footer
+        const currentYear = new Date().getFullYear();
+        currentYearMobileSpan.textContent = currentYear;
+        currentYearFooterSpan.textContent = currentYear;
+
+        // Function to open the mobile menu
+        function openMobileMenu() {
+            mobileMenu.classList.remove('hidden');
+            mobileMenuBackdrop.classList.remove('hidden');
+            mobileMenuButton.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Function to close the mobile menu
+        function closeMobileMenu() {
+            mobileMenu.classList.add('hidden');
+            mobileMenuBackdrop.classList.add('hidden');
+            mobileMenuButton.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Event listeners for opening and closing the mobile menu
+        mobileMenuButton.addEventListener('click', openMobileMenu);
+        mobileMenuCloseButton.addEventListener('click', closeMobileMenu);
+        mobileMenuBackdrop.addEventListener('click', closeMobileMenu);
+
+        // --- Smooth Scrolling Logic ---
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    // Close mobile menu if open
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        closeMobileMenu();
+                    }
+                    // Scroll to the target element with smooth behavior
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // --- Cookie Consent Logic ---
+        function hasCookieConsent() {
+            return localStorage.getItem('cookieConsent') === 'accepted';
+        }
+
+        function showCookieBanner() {
+            setTimeout(() => {
+                cookieBanner.classList.remove('hidden');
+                cookieBanner.classList.add('show');
+            }, 100);
+        }
+
+        function hideCookieBanner() {
+            cookieBanner.classList.remove('show');
+            setTimeout(() => {
+                cookieBanner.classList.add('hidden');
+            }, 500);
+        }
+
+        acceptCookiesButton.addEventListener('click', () => {
+            localStorage.setItem('cookieConsent', 'accepted');
+            hideCookieBanner();
+        });
+
+        declineCookiesButton.addEventListener('click', () => {
+            localStorage.setItem('cookieConsent', 'declined');
+            hideCookieBanner();
+        });
+
+        learnMoreCookiesLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log("Navigating to Cookies Policy page...");
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!hasCookieConsent()) {
+                showCookieBanner();
+            }
+        });
+
+        // --- Slider Logic ---
+        function updateSlider() {
+            sliderContainer.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+            updateDots();
+        }
+
+        function updateDots() {
+            slideIndicators.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === currentSlideIndex) {
+                    dot.classList.add('active');
+                }
+                dot.addEventListener('click', () => {
+                    currentSlideIndex = i;
+                    updateSlider();
+                    resetAutoPlay();
+                });
+                slideIndicators.appendChild(dot);
+            }
+        }
+
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+            updateSlider();
+        }
+
+        function prevSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+            updateSlider();
+        }
+
+        function startAutoPlay() {
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+
+        function stopAutoPlay() {
+            clearInterval(slideInterval);
+        }
+
+        function resetAutoPlay() {
+            stopAutoPlay();
+            startAutoPlay();
+        }
+
+        nextSlideButton.addEventListener('click', () => {
+            nextSlide();
+            resetAutoPlay();
+        });
+        prevSlideButton.addEventListener('click', () => {
+            prevSlide();
+            resetAutoPlay();
+        });
+
+        sliderSection.addEventListener('mouseenter', stopAutoPlay);
+        sliderSection.addEventListener('mouseleave', startAutoPlay);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSlider();
+            startAutoPlay();
+        });
+    </script>
+
+</body>
+</html>
